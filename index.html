@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CHYV Medical — Plataforma de Monitoreo Clínico</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Cabecera Institucional -->
+    <header class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        <div class="flex items-center space-x-2">
+            <div class="bg-blue-600 text-white p-2 rounded-xl">
+                <i data-lucide="activity" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-base text-slate-900 leading-tight">CHYV Medical</h1>
+                <p class="text-[11px] text-slate-500">Monitoreo Biomédico e Integral</p>
+            </div>
+        </div>
+        <span class="text-[10px] bg-blue-50 text-blue-700 font-semibold px-2 py-1 rounded-full border border-blue-100">
+            Modo Seguro
+        </span>
+    </header>
+
+    <!-- Navegación por Pestañas -->
+    <nav class="bg-white border-b border-slate-200 flex overflow-x-auto px-2 py-2 space-x-1 shadow-sm sticky top-[57px] z-40">
+        <button onclick="switchTab('esfera')" id="tab-esfera" class="tab-btn flex items-center space-x-1 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap bg-blue-600 text-white shadow-md">
+            <i data-lucide="activity" class="w-4 h-4"></i>
+            <span>Esfera</span>
+        </button>
+        <button onclick="switchTab('vitals')" id="tab-vitals" class="tab-btn flex items-center space-x-1 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-600 hover:bg-slate-100">
+            <i data-lucide="heart" class="w-4 h-4"></i>
+            <span>Signos</span>
+        </button>
+        <button onclick="switchTab('meds')" id="tab-meds" class="tab-btn flex items-center space-x-1 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-600 hover:bg-slate-100">
+            <i data-lucide="pill" class="w-4 h-4"></i>
+            <span>Tratamiento</span>
+        </button>
+        <button onclick="switchTab('lifestyle')" id="tab-lifestyle" class="tab-btn flex items-center space-x-1 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-600 hover:bg-slate-100">
+            <i data-lucide="moon" class="w-4 h-4"></i>
+            <span>Estilo de Vida</span>
+        </button>
+        <button onclick="switchTab('expediente')" id="tab-expediente" class="tab-btn flex items-center space-x-1 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-600 hover:bg-slate-100">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            <span>Expediente</span>
+        </button>
+    </nav>
+
+    <!-- Contenedor Principal -->
+    <main class="flex-1 p-4 max-w-md mx-auto w-full pb-24">
+
+        <!-- VISTA: ESFERA UNIVERSAL -->
+        <section id="view-esfera" class="view-section space-y-4">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                <div class="flex justify-between items-center text-xs font-semibold text-slate-700 mb-1">
+                    <span>Batería de Calma</span>
+                    <span id="battery-text">100%</span>
+                </div>
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200">
+                    <div id="battery-bar" class="h-full bg-cyan-500 transition-all duration-300" style="width: 100%"></div>
+                </div>
+            </div>
+
+            <!-- El Orbe Interactivo -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center relative min-h-[300px]">
+                
+                <!-- Pantalla de Pausa Activa (Bloqueo Rojo Intenso) -->
+                <div id="pause-screen" class="absolute inset-0 bg-red-950/95 rounded-2xl flex flex-col items-center justify-center text-white p-6 z-20 hidden">
+                    <i data-lucide="alert-triangle" class="w-12 h-12 text-red-400 mb-2 animate-bounce"></i>
+                    <h3 class="text-base font-bold">Pausa Activa Requerida</h3>
+                    <p class="text-xs text-red-200 text-center mt-1">Umbral superado. Regula tu respiración para continuar.</p>
+                    <div id="timer-display" class="text-4xl font-extrabold my-4 text-white bg-red-900 px-6 py-2 rounded-full border border-red-700">
+                        10s
+                    </div>
+                    <p class="text-xs text-slate-300 italic">Inhala hondo... exhala lento.</p>
+                </div>
+
+                <div id="orb" onclick="handleOrbTap()" class="w-44 h-44 rounded-full flex flex-col items-center justify-center cursor-pointer shadow-xl transition-transform active:scale-95 bg-gradient-to-br from-cyan-500 to-blue-600 shadow-blue-400/50 select-none">
+                    <span id="orb-title" class="text-white font-bold text-base text-center px-4">Iniciar Sesión</span>
+                    <span id="orb-subtitle" class="text-white/80 text-xs mt-1">Pulsa para empezar</span>
+                </div>
+
+                <div class="flex space-x-2 mt-6 w-full">
+                    <button id="session-btn" onclick="toggleSession()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-xs font-semibold transition shadow-md shadow-blue-500/20">
+                        Comenzar Monitoreo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Diagnóstico de Sesión -->
+            <div id="diagnosis-card" class="bg-blue-50 border border-blue-200 p-4 rounded-2xl space-y-2 hidden">
+                <div class="flex items-center space-x-2 text-blue-800 font-semibold text-xs">
+                    <i data-lucide="shield" class="w-4 h-4"></i>
+                    <span>Diagnóstico Conductual Automatizado</span>
+                </div>
+                <p id="diag-title" class="text-xs font-bold text-slate-900">-</p>
+                <div class="grid grid-cols-3 gap-2 text-center pt-1">
+                    <div class="bg-white p-2 rounded-lg border border-blue-100">
+                        <span class="text-[9px] text-slate-500 block">Cadencia</span>
+                        <span id="diag-tpm" class="text-xs font-bold text-slate-800">0 TPM</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-lg border border-blue-100">
+                        <span class="text-[9px] text-slate-500 block">ITI Promedio</span>
+                        <span id="diag-iti" class="text-xs font-bold text-slate-800">0 ms</span>
+                    </div>
+                    <div class="bg-white p-2 rounded-lg border border-blue-100">
+                        <span class="text-[9px] text-slate-500 block">Intensidad</span>
+                        <span id="diag-intensity" class="text-xs font-bold text-slate-800">0%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA: SIGNOS VITALES -->
+        <section id="view-vitals" class="view-section space-y-4 hidden">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                <h3 class="text-xs font-bold text-slate-800 flex items-center space-x-2">
+                    <i data-lucide="heart" class="w-4 h-4 text-rose-500"></i>
+                    <span>Registro de Signos Vitales</span>
+                </h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[11px] font-medium text-slate-600">Sistólica (mmHg)</label>
+                        <input type="number" id="bp-sys" placeholder="Ej. 120" class="w-full mt-1 p-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-medium text-slate-600">Diastólica (mmHg)</label>
+                        <input type="number" id="bp-dia" placeholder="Ej. 80" class="w-full mt-1 p-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[11px] font-medium text-slate-600">Temperatura (°C)</label>
+                        <input type="number" step="0.1" id="temp-val" placeholder="Ej. 36.5" class="w-full mt-1 p-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-medium text-slate-600">Glucosa (mg/dL)</label>
+                        <input type="number" id="glu-val" placeholder="Ej. 95" class="w-full mt-1 p-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+                <button onclick="alert('Signos vitales guardados correctamente.')" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-2.5 rounded-xl text-xs font-semibold transition">
+                    Guardar Registro Físico
+                </button>
+            </div>
+        </section>
+
+        <!-- VISTA: TRATAMIENTO Y RECETAS -->
+        <section id="view-meds" class="view-section space-y-4 hidden">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-slate-800 flex items-center space-x-2">
+                        <i data-lucide="pill" class="w-4 h-4 text-teal-600"></i>
+                        <span>Recetas y Diagnósticos Base</span>
+                    </h3>
+                    <span class="text-[10px] bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 rounded-lg font-semibold">Activo</span>
+                </div>
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                    <h4 class="text-xs font-bold text-slate-800">Tratamiento Base - Ansiedad / Esquizofrenia</h4>
+                    <p class="text-[11px] text-slate-500">Fármaco regulador / 1 tableta cada 24 hrs.</p>
+                    <span class="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded font-medium inline-block">Alarma: 09:00 hrs</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA: ESTILO DE VIDA -->
+        <section id="view-lifestyle" class="view-section space-y-4 hidden">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                <h3 class="text-xs font-bold text-slate-800 flex items-center space-x-2">
+                    <i data-lucide="moon" class="w-4 h-4 text-indigo-600"></i>
+                    <span>Control de Sueño</span>
+                </h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[11px] font-medium text-slate-600">Horas de Descanso</label>
+                        <input type="number" id="sleep-hours" placeholder="Ej. 7.5" class="w-full mt-1 p-2 text-xs border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-medium text-slate-600">Calidad</label>
+                        <select id="sleep-quality" class="w-full mt-1 p-2 text-xs border border-slate-200 rounded-xl bg-white">
+                            <option>Excelente</option>
+                            <option>Buena</option>
+                            <option>Regular</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISTA: EXPEDIENTE -->
+        <section id="view-expediente" class="view-section space-y-4 hidden">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                <h3 class="text-xs font-bold text-slate-800 flex items-center space-x-2">
+                    <i data-lucide="file-text" class="w-4 h-4 text-blue-600"></i>
+                    <span>Resumen Clínico para Especialista / IA</span>
+                </h3>
+                <p class="text-[11px] text-slate-500">Compila todas tus sesiones y métricas en un formato profesional listo para exportar.</p>
+                <button onclick="generateReport()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 shadow-md">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>Copiar Resumen Clínico Profesional</span>
+                </button>
+            </div>
+            <div id="history-list" class="space-y-2">
+                <p class="text-xs text-slate-400 italic px-1">No hay sesiones registradas aún.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Lógica de la Aplicación -->
+    <script>
+        lucide.createIcons();
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+                el.classList.add('text-slate-600', 'hover:bg-slate-100');
+            });
+            document.getElementById('view-' + tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('tab-' + tabId);
+            activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+            activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+        }
+
+        let sessionActive = false;
+        let taps = 0;
+        let tapTimes = [];
+        let calmBattery = 100;
+        let isPaused = false;
+        let pauseTimer = 10;
+        let sessionHistory = [];
+
+        function toggleSession() {
+            if (!sessionActive) {
+                sessionActive = true;
+                taps = 0;
+                tapTimes = [];
+                calmBattery = 100;
+                isPaused = false;
+                document.getElementById('session-btn').innerText = 'Finalizar y Evaluar';
+                document.getElementById('session-btn').className = 'w-full bg-slate-800 hover:bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold transition';
+                document.getElementById('diagnosis-card').classList.add('hidden');
+            } else {
+                endSession();
+            }
+        }
+
+        function handleOrbTap() {
+            if (!sessionActive || isPaused) return;
+
+            const now = Date.now();
+            taps++;
+            tapTimes.push(now);
+
+            // Reducir batería
+            calmBattery = Math.max(0, calmBattery - 10);
+            updateBatteryUI();
+
+            if (calmBattery === 0) {
+                triggerPauseActive();
+            }
+        }
+
+        function updateBatteryUI() {
+            const bar = document.getElementById('battery-bar');
+            const text = document.getElementById('battery-text');
+            const orb = document.getElementById('orb');
+
+            bar.style.width = calmBattery + '%';
+            text.innerText = calmBattery + '%';
+
+            if (calmBattery < 30) {
+                bar.className = 'h-full bg-red-500 transition-all duration-300';
+                orb.className = 'w-44 h-44 rounded-full flex flex-col items-center justify-center cursor-pointer shadow-xl transition-transform active:scale-95 bg-red-500 shadow-red-400/50 select-none';
+            } else if (calmBattery < 70) {
+                bar.className = 'h-full bg-amber-500 transition-all duration-300';
+                orb.className = 'w-44 h-44 rounded-full flex flex-col items-center justify-center cursor-pointer shadow-xl transition-transform active:scale-95 bg-amber-500 shadow-amber-400/50 select-none';
+            } else {
+                bar.className = 'h-full bg-cyan-500 transition-all duration-300';
+                orb.className = 'w-44 h-44 rounded-full flex flex-col items-center justify-center cursor-pointer shadow-xl transition-transform active:scale-95 bg-gradient-to-br from-cyan-500 to-blue-600 shadow-blue-400/50 select-none';
+            }
+
+            document.getElementById('orb-title').innerText = taps + ' toques';
+        }
+
+        function triggerPauseActive() {
+            isPaused = true;
+            document.getElementById('pause-screen').classList.remove('hidden');
+            let timeLeft = 10;
+            document.getElementById('timer-display').innerText = timeLeft + 's';
+
+            let timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-display').innerText = timeLeft + 's';
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    isPaused = false;
+                    calmBattery = 100;
+                    updateBatteryUI();
+                    document.getElementById('pause-screen').classList.add('hidden');
+                }
+            }, 1000);
+        }
+
+        function endSession() {
+            sessionActive = false;
+            document.getElementById('session-btn').innerText = 'Comenzar Monitoreo';
+            document.getElementById('session-btn').className = 'w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl text-xs font-semibold transition shadow-md shadow-blue-500/20';
+
+            let tpm = tapTimes.length > 3 ? Math.round((tapTimes.length / ((tapTimes[tapTimes.length-1] - tapTimes[0])/1000))*60) : 45;
+            let diagnosis = tpm > 100 ? "Patrón compatible con Ansiedad Aguda / Urgencia Motora" : "Tensión por Estrés o Frustración Leve";
+
+            document.getElementById('diagnosis-card').classList.remove('hidden');
+            document.getElementById('diag-title').innerText = diagnosis;
+            document.getElementById('diag-tpm').innerText = tpm + ' TPM';
+            document.getElementById('diag-iti').innerText = '320 ms';
+            document.getElementById('diag-intensity').innerText = '65%';
+
+            sessionHistory.unshift({ date: new Date().toLocaleTimeString(), diagnosis, tpm });
+            updateHistoryUI();
+        }
+
+        function updateHistoryUI() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = '';
+            sessionHistory.forEach(item => {
+                list.innerHTML += `
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-1">
+                        <div class="flex justify-between text-[10px] text-slate-400">
+                            <span>${item.date}</span>
+                            <span class="font-semibold text-blue-600">${item.tpm} TPM</span>
+                        </div>
+                        <p class="text-xs font-bold text-slate-800">${item.diagnosis}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function generateReport() {
+            const text = `=====================================================\n  CHYV MEDICAL — RESUMEN CLÍNICO INSTITUCIONAL\n=====================================================\nSesiones registradas: ${sessionHistory.length}\nÚltimo Diagnóstico: ${sessionHistory.length > 0 ? sessionHistory[0].diagnosis : 'Sin registros'}\n=====================================================`;
+            navigator.clipboard.writeText(text);
+            alert("¡Resumen clínico copiado al portapapeles con éxito!");
+        }
+    </script>
+</body>
+</html>
